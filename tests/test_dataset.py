@@ -2,7 +2,7 @@ import unittest
 import os
 from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader
-from torchvision.transforms import PILToTensor, ToPILImage
+from torchvision.transforms import PILToTensor, ToPILImage, Compose
 import matplotlib.pyplot as plt
 
 class testMNIST(unittest.TestCase):
@@ -21,7 +21,8 @@ class testMNIST(unittest.TestCase):
         train_loader = DataLoader(mnist_train, 8, shuffle=True)
         
         for imgs, labels in train_loader:
-
+            
+            imgs = imgs.float() / 255.
             fig, axs = plt.subplots(2, 4)
             for i, (img, label) in enumerate(zip(imgs, labels)):
                 axs[i//4, i%4].imshow(t2pil(img))

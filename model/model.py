@@ -4,14 +4,13 @@ import torch.nn.functional as F
 
 class DCGANDiscriminator(nn.Module):
 
-    def __init__(self, img_size, n_channels, n_filters, n_layers, n_classes, l_relu_slope, kernel_size=3) -> None:
+    def __init__(self, img_size, n_channels, n_filters, n_layers, l_relu_slope, kernel_size=3) -> None:
 
         super().__init__()
 
         # Params
         self.img_size = img_size
         self.n_layers = n_layers
-        self.n_classes = n_classes
         self.l_relu_slope = l_relu_slope
         self.n_filters = n_filters
 
@@ -35,7 +34,7 @@ class DCGANDiscriminator(nn.Module):
 
         n_out_features = tmp_img_size * tmp_img_size * n_channels
         self.flatten = nn.Flatten()
-        self.out = nn.Linear(n_out_features, n_classes)
+        self.out = nn.Linear(n_out_features, 1)
 
 
 
@@ -86,6 +85,6 @@ class DCGANGenerator(nn.Module):
         x = self.dense(x)
         x = self.reshape(x)
         for i, layer in enumerate(self.conv_t_layers):
-            x = F.relu(layer(x)) if i!=len(self.conv_t_layers) else F.tanh(layer(x))
+            x = F.relu(layer(x)) if i!=len(self.conv_t_layers) else F.sigmoid(layer(x)) # NOTE: Put sigmoid instead of tanh to make outputs in range [0, 1]
         return x
 
