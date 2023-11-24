@@ -61,7 +61,7 @@ class Reshape(nn.Module):
 
 class DCGANGenerator(nn.Module):
 
-    def __init__(self, latent_dim, n_channels, n_filters, n_layers) -> None:
+    def __init__(self, latent_dim, n_channels, n_filters, n_layers, mnist=False) -> None:
 
         super().__init__()
 
@@ -73,12 +73,17 @@ class DCGANGenerator(nn.Module):
 
         self.conv_t_layers = nn.ModuleList()
         tmp_filters = n_filters*(2**n_layers)
-        for _ in range(n_layers):
+        for _ in range(n_layers-1):
             self.conv_t_layers.append(nn.ConvTranspose2d(tmp_filters, tmp_filters // 2, 4, 2, 1, bias=False))
             tmp_filters = tmp_filters // 2
 
-        self.conv_t_layers.append(
-            nn.ConvTranspose2d(tmp_filters, n_channels, kernel_size=1, stride=1, padding=2, bias=False))
+        if mnist:
+            self.conv_t_layers.append(nn.ConvTranspose2d(tmp_filters, tmp_filters // 2, 4, 2, 1, bias=False))
+            tmp_filters = tmp_filters // 2
+            self.conv_t_layers.append(
+                nn.ConvTranspose2d(tmp_filters, n_channels, kernel_size=1, stride=1, padding=2, bias=False))
+        else:
+            self.conv_t_layers.append(nn.ConvTranspose2d(tmp_filters, n_channels, 4, 2, 1, bias=False))
 
     def forward(self, x):
 

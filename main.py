@@ -2,8 +2,8 @@ import os
 import torch
 from torch.utils.data import DataLoader #, Subset
 from torch.optim import Adam
-from torchvision.transforms import PILToTensor, ToPILImage
-from torchvision.datasets import MNIST
+from torchvision.transforms import PILToTensor, ToPILImage, Compose, Resize
+from torchvision.datasets import MNIST, CelebA
 
 from model.model import DCGANDiscriminator, DCGANGenerator
 from model.loss import WassersteinGPLoss, GeneratorLoss
@@ -13,23 +13,25 @@ from trainer.trainer import Trainer
 if __name__=='__main__':
 
     # Constants
-    IMG_SIZE = 28
-    N_CHANNELS = 1
+    DATASET = 'CELEBA'
+    OUT_DIR = 'out_celeba'
+    IMG_SIZE = 64 # 28 for MNIST, 64 for CELEBA
+    N_CHANNELS = 3
     N_FILTERS = 64
     L_RELU = 0.2
     LOSS_L = 10
     LATENT_DIM = 100
-    N_LAYERS = 4
+    N_LAYERS = 5 # 4 for mnist, 5 for celeba
 
     BATCH_SIZE = 64
     LR = 3e-4
     BETA1 = 0.5
     BETA2 = 0.999
     TRAIN_GEN_EACH = 5
-    N_EPOCHS = 5
+    N_EPOCHS = 1
     SAVE_EACH = 1
 
-    CKPT_DIR = 'output/state_dict.pt'
+    CKPT_DIR = OUT_DIR + '/state_dict.pt'
     #CKPT_DIR = None
 
     # Device
@@ -42,14 +44,25 @@ if __name__=='__main__':
     generator = DCGANGenerator(LATENT_DIM, N_CHANNELS, N_FILTERS, N_LAYERS).to(device)
 
     # Load dataset
-    transform = PILToTensor()
-
     t2pil = ToPILImage()
-    train_dataset = MNIST(
-        root=os.path.join('dataset', 'mnist'),
-        download=True,
-        transform=transform,
-        train=True)
+    if DATASET=='MNIST':
+
+        transform = PILToTensor()
+
+        train_dataset = MNIST(
+            root=os.path.join('data', 'mnist'),
+            download=False,
+            transform=transform,
+            train=True)
+        
+    elif DATASET=='CELEBA':
+
+        transform = Compose([
+            PILToTensor(),
+            Resize((64, 64))
+            ])
+        
+        train_dataset = CelebA(os.path.join('data', 'CelebA'), 'train', transform=transform, download=False)
     
     # train_dataset = Subset(train_dataset, range(1000))
     
@@ -66,7 +79,7 @@ if __name__=='__main__':
                       discriminator, generator,
                       disc_criterion, gen_criterion,
                       disc_optimizer, gen_optimizer, None,
-                      BATCH_SIZE, train_loader, TRAIN_GEN_EACH, SAVE_EACH, device, 'output', CKPT_DIR)
+                      BATCH_SIZE, train_loader, TRAIN_GEN_EACH, SAVE_EACH, device, OUT_DIR, CKPT_DIR)
     
 
     trainer.train(n_epochs=N_EPOCHS)
