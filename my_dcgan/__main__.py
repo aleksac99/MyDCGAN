@@ -112,7 +112,6 @@ def main():
                       disc_optimizer, gen_optimizer, None,
                       cfg['batch_size'], train_loader, cfg['train_gen_each'], cfg['save_each'], device, cfg['out_dir'], cfg['ckpt_dir'])
     
-    exit()
     trainer.train(n_epochs=cfg['n_epochs'])
 
 if __name__=='__main__':
