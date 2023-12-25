@@ -83,7 +83,7 @@ def main():
 
         train_dataset = MNIST(
             root=os.path.join('data', 'mnist'),
-            download=False,
+            download=True,
             transform=transform,
             train=True)
         

@@ -1,6 +1,6 @@
 {
-    "dataset": "CELEBA",
-    "out_dir": "out_celeba",
+    "dataset": "MNIST",
+    "out_dir": "out_mnist",
     "n_filters": 64,
     "l_relu": 0.2,
     "loss_l": 10,
