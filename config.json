@@ -1,0 +1,16 @@
+{
+    "dataset": "CELEBA",
+    "out_dir": "out_celeba",
+    "n_filters": 64,
+    "l_relu": 0.2,
+    "loss_l": 10,
+    "latent_dim": 100,
+    "batch_size": 64,
+    "lr": 3e-4,
+    "beta1": 0.5,
+    "beta2": 0.999,
+    "train_gen_each": 5,
+    "n_epochs": 1,
+    "save_each": 1,
+    "state_dict": "state_dict.pt"
+}
