@@ -111,7 +111,7 @@ class Trainer:
 
         z_fixed = -2. * torch.rand(36, self.latent_dim) + 1.
         z_fixed = z_fixed.to(self.device)
-        pbar = tqdm(range(self.starting_epoch, self.starting_epoch + n_epochs))
+        pbar = tqdm(range(self.starting_epoch, self.starting_epoch + n_epochs), leave=True)
 
         for epoch in pbar:
 
@@ -131,7 +131,7 @@ class Trainer:
 
             if (epoch + 1) % self.save_each == 0:
 
-                self.save_generated_samples(epoch, z_fixed)
+                self.save_generated_samples(epoch + 1, z_fixed)
             self.save_ckpt(epoch + 1, self.disc_loss, self.gen_loss)
 
         # Save final model and samples
