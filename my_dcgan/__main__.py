@@ -7,31 +7,31 @@ from torch.optim import Adam
 from torchvision.transforms import PILToTensor, ToPILImage, Compose, Resize
 from torchvision.datasets import MNIST, CelebA
 
-from model.model import DCGANDiscriminator, DCGANGenerator
-from model.loss import WassersteinGPLoss, GeneratorLoss
-from trainer.trainer import Trainer
+from my_dcgan.model.model import DCGANDiscriminator, DCGANGenerator
+from my_dcgan.model.loss import WassersteinGPLoss, GeneratorLoss
+from my_dcgan.trainer.trainer import Trainer
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument('config', required=True, help='Path to config file')
+    parser.add_argument('config', help='Path to config file', type=str)
 
     return parser.parse_args()
 
 
-if __name__=='__main__':
+def main():
 
-    cfg_path = parse_args()
+    args = parse_args()
 
-    with open(cfg_path, 'r') as f:
+    with open(args.config, 'r') as f:
         cfg = json.load(f)
 
-    if cfg['img_size'] is None:
+    if cfg.get('img_size') is None:
         cfg['img_size'] = 64 if cfg['dataset']=='CELEBA' else 28
 
-    if cfg['n_channels'] is None:
+    if cfg.get('n_channels') is None:
         cfg['n_channels'] = 3 if cfg['dataset']=='CELEBA' else 1
 
-    if cfg['n_layers'] is None:
+    if cfg.get('n_layers') is None:
         cfg['n_layers'] = 5 if cfg['dataset']=='CELEBA' else 4
 
     # # Constants
@@ -58,7 +58,7 @@ if __name__=='__main__':
 
     # Device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(device)
+    print(f'Device: {device}')
 
     # Load models
     discriminator = DCGANDiscriminator(
@@ -112,5 +112,8 @@ if __name__=='__main__':
                       disc_optimizer, gen_optimizer, None,
                       cfg['batch_size'], train_loader, cfg['train_gen_each'], cfg['save_each'], device, cfg['out_dir'], cfg['ckpt_dir'])
     
-
+    exit()
     trainer.train(n_epochs=cfg['n_epochs'])
+
+if __name__=='__main__':
+    main()

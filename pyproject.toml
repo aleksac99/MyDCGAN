@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["my_dcgan", "my_dcgan.model", "my_dcgan.trainer"]
+
+[project]
+name = "my-dcgan"
+version = "0.1"
+dependencies = [
+  "torch",
+  "torchvision"
+]
+requires-python = ">=3.10"
+authors = [
+  {name = "Aleksa Cvetanović", email = "aleksa.cvetanovic99@gmail.com"},
+]
+maintainers = [
+  {name = "Aleksa Cvetanović", email = "aleksa.cvetanovic99@gmail.com"}
+]
+description = "My implementation of Deep Convolutional Generative Adversarial Network (DCGAN) architecture, trained by using Wasserstein Loss with Gradient Penalty."
+readme = "README.md"
+keywords = ["gan", "deeplearning", "machinelearning", "computervision", "imageprocessing"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+
+[project.scripts]
+my-dcgan = "my_dcgan.__main__:main"
