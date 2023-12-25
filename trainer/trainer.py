@@ -152,7 +152,6 @@ class Trainer:
             for idx, out in enumerate(x_fake):
                 img = t2pil(out)
                 img.save(os.path.join(self.save_dir, str(epoch), f'{str(idx)}.png'))
-                # img.save(os.path.join(self.save_dir, str(epoch), f'{str(idx)}.png' ), 'png')
 
 
     def save_ckpt(self, epoch, disc_loss, gen_loss):

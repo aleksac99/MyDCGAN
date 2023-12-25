@@ -2,11 +2,6 @@ import torch
 import torch.nn as nn
 from torch.autograd import grad
 
-# from graphviz import Digraph
-import torch
-#from torchviz import make_dot
-
-
 
 # TODO: Create Wasserstein Loss with Lipschitz penalty:
 # penalty = (torch.clamp(grads - 1., min=0, max=None) ** 2).mean()

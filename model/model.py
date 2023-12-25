@@ -1,4 +1,3 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -68,7 +67,7 @@ class DCGANGenerator(nn.Module):
         self.latent_dim = latent_dim
         self.n_filters = n_filters
 
-        self.dense = nn.Linear(latent_dim, n_filters*(2**n_layers) * 2 * 2) # NOTE: Hardcoded img_size
+        self.dense = nn.Linear(latent_dim, n_filters*(2**n_layers) * 2 * 2)
         self.reshape = Reshape(n_filters*(2**n_layers), 2)
 
         self.conv_t_layers = nn.ModuleList()
@@ -90,6 +89,6 @@ class DCGANGenerator(nn.Module):
         x = self.dense(x)
         x = self.reshape(x)
         for i, layer in enumerate(self.conv_t_layers):
-            x = F.relu(layer(x)) if i!=len(self.conv_t_layers) else F.sigmoid(layer(x)) # NOTE: Put sigmoid instead of tanh to make outputs in range [0, 1]
+            x = F.relu(layer(x)) if i!=len(self.conv_t_layers) else F.sigmoid(layer(x))
         return x
 
