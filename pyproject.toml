@@ -10,7 +10,8 @@ name = "my-dcgan"
 version = "0.1"
 dependencies = [
   "torch",
-  "torchvision"
+  "torchvision",
+  "tqdm"
 ]
 requires-python = ">=3.10"
 authors = [
