@@ -132,7 +132,7 @@ class Trainer:
             if (epoch + 1) % self.save_each == 0:
 
                 self.save_generated_samples(epoch, z_fixed)
-            self.save_ckpt(epoch, self.disc_loss, self.gen_loss)
+            self.save_ckpt(epoch + 1, self.disc_loss, self.gen_loss)
 
         # Save final model and samples
         self.save_generated_samples(self.starting_epoch + n_epochs, z_fixed)
@@ -180,10 +180,10 @@ class Trainer:
                 ckpt['gen_optimizer_state_dict'])
             self.disc_loss = ckpt['disc_loss']
             self.gen_loss = ckpt['gen_loss']
-            epoch = ckpt['epoch'] + 1
+            epoch = ckpt['epoch']
 
             print(
-                f'Successfully loaded checkpoint. Training starting from epoch {epoch}')
+                f'Successfully loaded checkpoint. Training starting from epoch {epoch + 1}')
             return epoch
         print('Checkpoint not found. Starting from scratch.')
         return 0
