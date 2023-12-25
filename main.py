@@ -1,6 +1,9 @@
+from collections import namedtuple
 import os
 import torch
-from torch.utils.data import DataLoader #, Subset
+import json
+from argparse import ArgumentParser
+from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torchvision.transforms import PILToTensor, ToPILImage, Compose, Resize
 from torchvision.datasets import MNIST, CelebA
@@ -9,29 +12,49 @@ from model.model import DCGANDiscriminator, DCGANGenerator
 from model.loss import WassersteinGPLoss, GeneratorLoss
 from trainer.trainer import Trainer
 
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument('config', required=True, help='Path to config file')
+
+    return parser.parse_args()
+
 
 if __name__=='__main__':
 
-    # Constants
-    DATASET = 'CELEBA'
-    OUT_DIR = 'out_celeba'
-    IMG_SIZE = 64 # 28 for MNIST, 64 for CELEBA
-    N_CHANNELS = 3
-    N_FILTERS = 64
-    L_RELU = 0.2
-    LOSS_L = 10
-    LATENT_DIM = 100
-    N_LAYERS = 5 # 4 for mnist, 5 for celeba
+    cfg_path = parse_args()
 
-    BATCH_SIZE = 64
-    LR = 3e-4
-    BETA1 = 0.5
-    BETA2 = 0.999
-    TRAIN_GEN_EACH = 5
-    N_EPOCHS = 1
-    SAVE_EACH = 1
+    with open(cfg_path, 'r') as f:
+        cfg = json.load(f)
 
-    CKPT_DIR = OUT_DIR + '/state_dict.pt'
+    if cfg['img_size'] is None:
+        cfg['img_size'] = 64 if cfg['dataset']=='CELEBA' else 28
+
+    if cfg['n_channels'] is None:
+        cfg['n_channels'] = 3 if cfg['dataset']=='CELEBA' else 1
+
+    if cfg['n_layers'] is None:
+        cfg['n_layers'] = 5 if cfg['dataset']=='CELEBA' else 4
+
+    # # Constants
+    # DATASET = 'CELEBA'
+    # OUT_DIR = 'out_celeba'
+    # IMG_SIZE = 64 # TODO: 28 for MNIST, 64 for CELEBA
+    # N_CHANNELS = 3 # TODO: 1 for MNIST, 3 for CELEBA
+    # N_FILTERS = 64
+    # L_RELU = 0.2
+    # LOSS_L = 10
+    # LATENT_DIM = 100
+    # N_LAYERS = 5 # 4 for mnist, 5 for celeba
+
+    # BATCH_SIZE = 64
+    # LR = 3e-4
+    # BETA1 = 0.5
+    # BETA2 = 0.999
+    # TRAIN_GEN_EACH = 5
+    # N_EPOCHS = 1
+    # SAVE_EACH = 1
+
+    cfg['ckpt_dir'] = os.path.join(cfg['out_dir'], cfg['state_dict'])
     #CKPT_DIR = None
 
     # Device
@@ -39,13 +62,22 @@ if __name__=='__main__':
     print(device)
 
     # Load models
-    discriminator = DCGANDiscriminator(IMG_SIZE, N_CHANNELS, N_FILTERS, N_LAYERS, L_RELU).to(device)
+    discriminator = DCGANDiscriminator(
+        cfg['img_size'],
+        cfg['n_channels'],
+        cfg['n_filters'],
+        cfg['n_layers'],
+        cfg['l_relu']).to(device)
     
-    generator = DCGANGenerator(LATENT_DIM, N_CHANNELS, N_FILTERS, N_LAYERS).to(device)
+    generator = DCGANGenerator(
+        cfg['latent_dim'],
+        cfg['n_channels'],
+        cfg['n_filters'],
+        cfg['n_layers']).to(device)
 
     # Load dataset
     t2pil = ToPILImage()
-    if DATASET=='MNIST':
+    if cfg['dataset']=='MNIST':
 
         transform = PILToTensor()
 
@@ -55,31 +87,31 @@ if __name__=='__main__':
             transform=transform,
             train=True)
         
-    elif DATASET=='CELEBA':
+    elif cfg['dataset']=='CELEBA':
 
         transform = Compose([
             PILToTensor(),
             Resize((64, 64))
             ])
         
-        train_dataset = CelebA(os.path.join('data', 'CelebA'), 'train', transform=transform, download=False)
+        train_dataset = CelebA(os.path.join('data', 'CelebA'), 'train', transform=transform, download=True)
+    else:
+        raise ValueError(f'Dataset is {cfg["dataset"]}. Should be one of: `CELEBA`, `MNIST`.')
     
-    # train_dataset = Subset(train_dataset, range(1000))
-    
-    train_loader = DataLoader(train_dataset, BATCH_SIZE, shuffle=True)
+    train_loader = DataLoader(train_dataset, cfg['batch_size'], shuffle=True)
 
     # Losses and optimizers
-    disc_criterion = WassersteinGPLoss(LOSS_L)
+    disc_criterion = WassersteinGPLoss(cfg['loss_l'])
     gen_criterion = GeneratorLoss()
-    disc_optimizer = Adam(discriminator.parameters(), LR, [BETA1, BETA2])
-    gen_optimizer = Adam(generator.parameters(), LR, [BETA1, BETA2])
+    disc_optimizer = Adam(discriminator.parameters(), cfg['lr'], [cfg['beta1'], cfg['beta2']])
+    gen_optimizer = Adam(generator.parameters(), cfg['lr'], [cfg['beta1'], cfg['beta2']])
 
     # Trainer
-    trainer = Trainer(LATENT_DIM,
+    trainer = Trainer(cfg['latent_dim'],
                       discriminator, generator,
                       disc_criterion, gen_criterion,
                       disc_optimizer, gen_optimizer, None,
-                      BATCH_SIZE, train_loader, TRAIN_GEN_EACH, SAVE_EACH, device, OUT_DIR, CKPT_DIR)
+                      cfg['batch_size'], train_loader, cfg['train_gen_each'], cfg['save_each'], device, cfg['out_dir'], cfg['ckpt_dir'])
     
 
-    trainer.train(n_epochs=N_EPOCHS)
+    trainer.train(n_epochs=cfg['n_epochs'])
