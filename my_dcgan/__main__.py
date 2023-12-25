@@ -72,7 +72,8 @@ def main():
         cfg['latent_dim'],
         cfg['n_channels'],
         cfg['n_filters'],
-        cfg['n_layers']).to(device)
+        cfg['n_layers'],
+        cfg['dataset']=='MNIST').to(device)
 
     # Load dataset
     t2pil = ToPILImage()
